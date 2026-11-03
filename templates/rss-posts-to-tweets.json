@@ -1,0 +1,81 @@
+{
+  "name": "Kualat: Shorten new RSS posts and tweet them",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Shorten new RSS posts and tweet them\n\nPolls an RSS feed, creates a kua.lat short link for every new post, then posts the title with the short link to X (Twitter).\n\nGreat for blogs, podcasts or changelogs: publish once, share everywhere with a trackable link.\n\n**Set up:**\n1. Install the **@kualat/n8n-nodes-kualat** community node under Settings → Community Nodes.\n2. Create a **Kualat API** credential (API URL, for example `https://kua.lat/api`, and an API key).\n3. Set your feed URL on the **RSS Feed Trigger** node.\n4. Connect an X (Twitter) OAuth2 credential on the **Post Tweet** node.\n5. Activate the workflow.",
+        "height": 380,
+        "width": 460
+      },
+      "id": "i9000000-0000-4000-8000-000000000001",
+      "name": "How to use",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-480, -160]
+    },
+    {
+      "parameters": {
+        "feedUrl": "https://example.com/feed.xml"
+      },
+      "id": "i9000000-0000-4000-8000-000000000002",
+      "name": "RSS Feed Trigger",
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "resource": "link",
+        "operation": "create",
+        "url": "={{ $json.link }}",
+        "additionalFields": {
+          "description": "={{ $json.title }}"
+        }
+      },
+      "id": "i9000000-0000-4000-8000-000000000003",
+      "name": "Create Link",
+      "type": "@kualat/n8n-nodes-kualat.kualat",
+      "typeVersion": 1,
+      "position": [260, 0]
+    },
+    {
+      "parameters": {
+        "resource": "tweet",
+        "operation": "create",
+        "text": "=📰 {{ $('RSS Feed Trigger').item.json.title }}\n\n{{ $json.short_url }}",
+        "additionalFields": {}
+      },
+      "id": "i9000000-0000-4000-8000-000000000004",
+      "name": "Post Tweet",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 2,
+      "position": [520, 0]
+    }
+  ],
+  "connections": {
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Link": {
+      "main": [
+        [
+          {
+            "node": "Post Tweet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "pinData": {}
+}

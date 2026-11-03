@@ -1,0 +1,115 @@
+{
+  "name": "Kualat: Email alert for clicks on one link",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Email alert for clicks on one link\n\nSends an email the moment a specific kua.lat link is clicked — handy for launches, campaigns or a checkout page you are watching.\n\n**Set up:**\n1. Install the **@kualat/n8n-nodes-kualat** community node under Settings → Community Nodes.\n2. Create a **Kualat API** credential (API URL, for example `https://kua.lat/api`, and an API key).\n3. Open the **Is it the watched link?** node and replace `https://kua.lat/watched-link` with the short URL you want to watch.\n4. Connect a Gmail credential and set the recipient on the **Send Email Alert** node.\n5. Activate the workflow.",
+        "height": 380,
+        "width": 460
+      },
+      "id": "e5000000-0000-4000-8000-000000000001",
+      "name": "How to use",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -160
+      ]
+    },
+    {
+      "parameters": {
+        "events": [
+          "link.clicked"
+        ],
+        "verify": true
+      },
+      "id": "e5000000-0000-4000-8000-000000000002",
+      "name": "Kualat Trigger",
+      "type": "@kualat/n8n-nodes-kualat.kualatTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "e5000000-0000-4000-8000-00000000000a0",
+              "leftValue": "={{ $json.data.short_url }}",
+              "rightValue": "https://kua.lat/watched-link",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e5000000-0000-4000-8000-000000000003",
+      "name": "Is it the watched link?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        260,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "you@example.com",
+        "subject": "=📣 Click alert: {{ $json.data.short_url }}",
+        "emailType": "text",
+        "message": "=Your watched link was just clicked.\n\nShort URL: {{ $json.data.short_url }}\nDestination: {{ $json.data.long_url }}\nVisitor: {{ $json.data.city || 'unknown' }}, {{ $json.data.country || 'unknown' }}\nDevice: {{ $json.data.os || 'unknown' }} · {{ $json.data.browser || 'unknown' }}\nReferrer: {{ $json.data.referer || 'direct' }}\nTotal clicks so far: {{ $json.data.clicks }}\nTime: {{ $json.created_at }}",
+        "options": {}
+      },
+      "id": "e5000000-0000-4000-8000-000000000004",
+      "name": "Send Email Alert",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        520,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Kualat Trigger": {
+      "main": [
+        [
+          {
+            "node": "Is it the watched link?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is it the watched link?": {
+      "main": [
+        [
+          {
+            "node": "Send Email Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "pinData": {}
+}

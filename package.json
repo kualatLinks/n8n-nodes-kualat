@@ -1,6 +1,6 @@
 {
-	"name": "@kualat/n8n",
-	"version": "1.0.0",
+	"name": "@kualat/n8n-nodes-kualat",
+	"version": "2.0.0",
 	"description": "n8n nodes for kua.lat: shorten links, read statistics, and receive signed link events.",
 	"keywords": [
 		"n8n-community-node-package",

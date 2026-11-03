@@ -1,0 +1,142 @@
+{
+  "name": "Kualat: Broken link checker",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Broken link checker\n\nOnce a day the workflow visits the destination of every active kua.lat link and emails you the ones that no longer respond correctly — timeouts, dead domains, 404s and the like.\n\nWhen everything is healthy, no email is sent.\n\n**Set up:**\n1. Install the **@kualat/n8n-nodes-kualat** community node under Settings → Community Nodes.\n2. Create a **Kualat API** credential (API URL, for example `https://kua.lat/api`, and an API key).\n3. Connect a Gmail credential and set the recipient on the **Send Report** node.\n4. With more than 100 links, raise the limit on **Get Links** or turn on Return All.\n5. Activate the workflow.",
+        "height": 400,
+        "width": 460
+      },
+      "id": "h8000000-0000-4000-8000-000000000001",
+      "name": "How to use",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-480, -160]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      },
+      "id": "h8000000-0000-4000-8000-000000000002",
+      "name": "Every morning",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "resource": "link",
+        "operation": "getAll",
+        "returnAll": false,
+        "limit": 100
+      },
+      "id": "h8000000-0000-4000-8000-000000000003",
+      "name": "Get Links",
+      "type": "@kualat/n8n-nodes-kualat.kualat",
+      "typeVersion": 1,
+      "position": [260, 0]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.long_url }}",
+        "options": {
+          "timeout": 10000,
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "h8000000-0000-4000-8000-000000000004",
+      "name": "Check Destination",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [520, 0],
+      "onError": "continueRegularOutput",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const links = $('Get Links').all().map((item) => item.json);\nconst results = $input.all();\n\nconst broken = [];\n\nfor (let i = 0; i < links.length; i++) {\n  const link = links[i];\n  const response = results[i] ? results[i].json : {};\n  const status = Number(response.statusCode ?? 0);\n\n  // 0 means the request itself failed: timeout, DNS, refused connection.\n  if (status === 0 || status >= 400) {\n    broken.push({\n      short_url: link.short_url,\n      long_url: link.long_url,\n      status,\n    });\n  }\n}\n\nif (broken.length === 0) {\n  return [];\n}\n\nconst lines = broken\n  .map((b) => `• ${b.short_url} → ${b.long_url} (status ${b.status})`)\n  .join('\\n');\n\nreturn [{ json: { count: broken.length, lines } }];"
+      },
+      "id": "h8000000-0000-4000-8000-000000000005",
+      "name": "Find Broken Links",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [780, 0]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "you@example.com",
+        "subject": "=⚠️ kua.lat: {{ $json.count }} broken link{{ $json.count === 1 ? '' : 's' }} found",
+        "emailType": "text",
+        "message": "=The following kua.lat links no longer redirect properly:\n\n{{ $json.lines }}\n\nFix or delete them from the kua.lat dashboard.",
+        "options": {}
+      },
+      "id": "h8000000-0000-4000-8000-000000000006",
+      "name": "Send Report",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1040, 0]
+    }
+  ],
+  "connections": {
+    "Every morning": {
+      "main": [
+        [
+          {
+            "node": "Get Links",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Links": {
+      "main": [
+        [
+          {
+            "node": "Check Destination",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Destination": {
+      "main": [
+        [
+          {
+            "node": "Find Broken Links",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Broken Links": {
+      "main": [
+        [
+          {
+            "node": "Send Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "pinData": {}
+}

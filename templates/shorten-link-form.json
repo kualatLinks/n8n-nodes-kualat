@@ -1,0 +1,101 @@
+{
+  "name": "Kualat: Short link form",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Short link form\n\nA small web form hosted by n8n: paste a long URL, submit, and the completion page shows the fresh kua.lat short link. Share the form URL with teammates so anyone can shorten links without touching the kua.lat dashboard.\n\n**Set up:**\n1. Install the **@kualat/n8n-nodes-kualat** community node under Settings → Community Nodes.\n2. Create a **Kualat API** credential (API URL, for example `https://kua.lat/api`, and an API key).\n3. Open the form once with **Execute workflow** and use the Test URL to try it.\n4. Activate the workflow and share the Production URL of the form trigger.",
+        "height": 340,
+        "width": 440
+      },
+      "id": "f0a00000-0000-4000-8000-000000000001",
+      "name": "How to use",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-460, -160]
+    },
+    {
+      "parameters": {
+        "path": "shorten-link",
+        "formTitle": "Create a short link",
+        "formDescription": "Paste a long URL and get a kua.lat short link back.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Destination URL",
+              "placeholder": "https://example.com/very/long/page",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Custom alias (optional)",
+              "placeholder": "spring-sale",
+              "requiredField": false
+            }
+          ]
+        },
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "f0a00000-0000-4000-8000-000000000002",
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.1,
+      "position": [0, 0],
+      "webhookId": "f0a00000-0000-4000-8000-000000000004"
+    },
+    {
+      "parameters": {
+        "resource": "link",
+        "operation": "create",
+        "url": "={{ $json['Destination URL'] }}",
+        "additionalFields": {
+          "custom": "={{ $json['Custom alias (optional)'] }}"
+        }
+      },
+      "id": "f0a00000-0000-4000-8000-000000000003",
+      "name": "Create Link",
+      "type": "@kualat/n8n-nodes-kualat.kualat",
+      "typeVersion": 1,
+      "position": [260, 0]
+    },
+    {
+      "parameters": {
+        "operation": "completion",
+        "respondWith": "text",
+        "completionTitle": "Your short link is ready",
+        "completionMessage": "=🔗 {{ $json.short_url }}\n\nDestination: {{ $json.long_url }}",
+        "options": {}
+      },
+      "id": "f0a00000-0000-4000-8000-000000000005",
+      "name": "Show Short Link",
+      "type": "n8n-nodes-base.form",
+      "typeVersion": 1,
+      "position": [520, 0]
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Create Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Link": {
+      "main": [
+        [
+          {
+            "node": "Show Short Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "pinData": {}
+}

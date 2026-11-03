@@ -1,4 +1,4 @@
-# @kualat/n8n
+# @kualat/n8n-nodes-kualat
 
 n8n community node for [kua.lat](https://kua.lat): shorten links, read click statistics, manage webhook subscriptions, and start workflows from link events.
 
@@ -11,16 +11,23 @@ Two nodes ship in this package:
 
 Both use one credential, **Kualat API**, holding your API root and an API key.
 
+> **Upgrading from `@kualat/n8n`?** The package was renamed so n8n accepts it in
+> **Settings → Community Nodes** (n8n requires a package name starting with
+> `n8n-nodes-`). Uninstall `@kualat/n8n`, install `@kualat/n8n-nodes-kualat`, and
+> re-select the credential on each Kualat node — the node type changed to
+> `@kualat/n8n-nodes-kualat.kualat`, so workflows saved with the old name need
+> their Kualat nodes replaced.
+
 ## Installation
 
 ### From npm
 
 ```bash
-npm install @kualat/n8n
+npm install @kualat/n8n-nodes-kualat
 ```
 
 Or, inside n8n: **Settings → Community Nodes → Install** and enter
-`@kualat/n8n`. Restart n8n afterwards; `Kualat` and `Kualat Trigger` then
+`@kualat/n8n-nodes-kualat`. Restart n8n afterwards; `Kualat` and `Kualat Trigger` then
 appear in the node panel.
 
 ### From a checkout of this package
@@ -97,6 +104,14 @@ Retries: 30 seconds after the first failure, then 5 minutes. A subscription that
 ## Update semantics
 
 `PATCH /links/{id}` replaces the optional fields it does not receive; omitted targeting, metadata and password are cleared. The **Update** operation therefore sends only the fields you fill in, and the field description states this. Fetch the link first if you need to preserve settings you do not intend to change.
+
+## Workflow templates
+
+Ready-made workflows live in [`templates/`](templates/) — click logging to a
+sheet, Slack and Telegram notifications, a link-creation API, a short-link form,
+bulk shortening from a sheet, and more. Each file imports through
+**Workflows → Import from File** and carries a sticky note with its own setup
+steps.
 
 ## Development
 

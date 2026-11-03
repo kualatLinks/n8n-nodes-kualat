@@ -1,0 +1,81 @@
+{
+  "name": "Kualat: Link creation API (webhook → kua.lat)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Link creation API\n\nThis workflow opens a POST endpoint on n8n: send `{\"url\": \"https://example.com\"}` as the body and the endpoint replies with the freshly created short URL.\n\nUseful for wiring up other tools (forms, bots, spreadsheets via Apps Script) without writing any integration code.\n\n**Set up:**\n1. Install the **@kualat/n8n-nodes-kualat** community node under Settings → Community Nodes.\n2. Create a **Kualat API** credential (API URL, for example `https://kua.lat/api`, and an API key).\n3. Activate the workflow, then use the Production URL shown on the Webhook node.\n\nExample call:\n`curl -X POST https://n8n.example.com/webhook/kualat-create-link -H \"Content-Type: application/json\" -d '{\"url\": \"https://example.com/promo\"}'`",
+        "height": 360,
+        "width": 460
+      },
+      "id": "c3000000-0000-4000-8000-000000000001",
+      "name": "How to use",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-460, -160]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "kualat-create-link",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000002",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "c3000000-0000-4000-8000-000000000004"
+    },
+    {
+      "parameters": {
+        "resource": "link",
+        "operation": "create",
+        "url": "={{ $json.body.url }}"
+      },
+      "id": "c3000000-0000-4000-8000-000000000003",
+      "name": "Create Link",
+      "type": "@kualat/n8n-nodes-kualat.kualat",
+      "typeVersion": 1,
+      "position": [260, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"id\": $json.id, \"short_url\": $json.short_url, \"long_url\": $json.long_url } }}",
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000005",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [520, 0]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Create Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Link": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "pinData": {}
+}

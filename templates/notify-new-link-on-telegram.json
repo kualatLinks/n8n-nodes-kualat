@@ -1,0 +1,57 @@
+{
+  "name": "Kualat: Notify about new links on Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Notify about new links on Telegram\n\nEvery link created on kua.lat is sent to a Telegram chat.\n\n**Set up:**\n1. Install the **@kualat/n8n-nodes-kualat** community node under Settings → Community Nodes.\n2. Create a **Kualat API** credential (API URL, for example `https://kua.lat/api`, and an API key).\n3. Create a bot with @BotFather and put its token in the Telegram credential.\n4. Fill in **Chat ID** with the target chat id (send a message to the bot, then check `https://api.telegram.org/bot<TOKEN>/getUpdates`).\n5. Activate the workflow.",
+        "height": 340,
+        "width": 420
+      },
+      "id": "b2000000-0000-4000-8000-000000000001",
+      "name": "How to use",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-460, -140]
+    },
+    {
+      "parameters": {
+        "events": ["link.created"],
+        "verify": true
+      },
+      "id": "b2000000-0000-4000-8000-000000000002",
+      "name": "Kualat Trigger",
+      "type": "@kualat/n8n-nodes-kualat.kualatTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "123456789",
+        "text": "=New link created on kua.lat\n\n{{ $json.data.short_url }}\n→ {{ $json.data.long_url }}",
+        "additionalFields": {}
+      },
+      "id": "b2000000-0000-4000-8000-000000000003",
+      "name": "Send Telegram Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [260, 0]
+    }
+  ],
+  "connections": {
+    "Kualat Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "pinData": {}
+}

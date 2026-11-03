@@ -1,0 +1,81 @@
+{
+  "name": "Kualat: Log clicks to Google Sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Log clicks to Google Sheets\n\nEvery click on a kua.lat link is appended to a Google Sheet as one row.\n\n**Set up:**\n1. Install the **@kualat/n8n-nodes-kualat** community node under Settings → Community Nodes.\n2. Create a **Kualat API** credential (API URL, for example `https://kua.lat/api`, and an API key from the dashboard).\n3. Create a Google spreadsheet, copy its URL, paste it into the Google Sheets node, then pick the target sheet.\n4. Activate the workflow. The first row of the sheet should hold the column titles: Timestamp, Short URL, Destination, Country, City, Referrer, OS, Browser, Total Clicks.",
+        "height": 320,
+        "width": 420
+      },
+      "id": "a1000000-0000-4000-8000-000000000001",
+      "name": "How to use",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-460, -140]
+    },
+    {
+      "parameters": {
+        "events": ["link.clicked"],
+        "verify": true
+      },
+      "id": "a1000000-0000-4000-8000-000000000002",
+      "name": "Kualat Trigger",
+      "type": "@kualat/n8n-nodes-kualat.kualatTrigger",
+      "typeVersion": 1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $json.created_at }}",
+            "Short URL": "={{ $json.data.short_url }}",
+            "Destination": "={{ $json.data.long_url }}",
+            "Country": "={{ $json.data.country }}",
+            "City": "={{ $json.data.city }}",
+            "Referrer": "={{ $json.data.referer }}",
+            "OS": "={{ $json.data.os }}",
+            "Browser": "={{ $json.data.browser }}",
+            "Total Clicks": "={{ $json.data.clicks }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000003",
+      "name": "Append to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [260, 0]
+    }
+  ],
+  "connections": {
+    "Kualat Trigger": {
+      "main": [
+        [
+          {
+            "node": "Append to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "pinData": {}
+}
